@@ -21,16 +21,3 @@ contentView.append(
   </$>
 );
 
-//* ActionSheet
-async function showActionSheet() {
-  const actionSheet = ActionSheet.open(
-    <ActionSheet title='القائمة'>
-      <ActionSheetItem centerX title='إضافة ملف' />
-      <ActionSheetItem title='الإحصائيات' />
-      <ActionSheetItem title='امتحان مُخصص' />
-      <ActionSheetItem title='حول التطبيق' />
-    </ActionSheet>
-  );
-  const { action } = await actionSheet.onClose.promise();
-}
-
