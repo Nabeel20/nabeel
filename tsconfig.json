@@ -16,7 +16,10 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowJs": true,
-    "typeRoots": ["node_modules/@types"]
+    "typeRoots": [
+      "node_modules/@types"
+    ],
+    "resolveJsonModule": true
   },
   "include": [
     "./src/**/*.ts",
