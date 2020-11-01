@@ -8,7 +8,7 @@ statusBar.background = '#333431'
 statusBar.theme = 'dark'
 navigationBar.background = '#333431';
 navigationBar.theme = 'dark'
-//* Colors are here 
+//* Colors 
 const success = '#14A38B'
 const error = '#FF7171'
 const warrning = '#F2AC57'
@@ -294,6 +294,8 @@ function exam_snackbar(info, color, icon) {
 function exam_page(data) {
   let title = data.title
   let subject = data.subject;
+  _.shuffle(data.questionlist);
+  data.questionlist.forEach(q => _.shuffle(q.choices))
   let all_questions = data.questionlist[score];
   return (
     <Page>
@@ -333,12 +335,10 @@ function exam_page(data) {
 
 
 function check(data, answer) {
-
   let right = data.questionlist[score].right;
-  console.error(right)
   let right_index = data.questionlist[score].choices.indexOf(right);
   let selector = '#b' + right_index
-  if (right === answer) {
+  if (_.isEqual(right, answer)) {
     exam_snackbar('جواب صحيح', success, '😎')
     next_question(data);
   } else {
