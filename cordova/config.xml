@@ -9,17 +9,6 @@
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
   <platform name="android">
-  <icon density="ldpi" src="src\ldpi"/>
-  <icon density="mdpi" src="src\mdpi.png"/>
-  <icon density="hdpi" src="src\hdpi.png"/> 
-  <icon density="xhdpi" src="src\xhdpi.png"/>
-  <icon density="xxhdpi" src="src\xxhdpi.png"/>
-  <icon density="xxxhdpi" src="src\xxxhdpi.png"/>
-  <splash density="ldpi" src="src\splash-port-ldpi.png"/>
-  <splash density="mdpi" src="src\splash-port-mdpi.png"/>
-  <splash density="hdpi" src="src\splash-port-hdpi.png"/>
-  <splash density="xhdpi" src="src\splash-port-xhdpi.png"/>
-  <splash density="xxhdpi" src="src\splash-port-xxhdpi.png"/>
-  <splash density="xxxhdpi" src="src\splash-port-xxxhdpi.png"/>
+    <icon src='src/xxxhdpi'/>
 </platform>
 </widget>
