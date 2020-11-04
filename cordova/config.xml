@@ -9,7 +9,7 @@
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
   <platform name="android">
-  <icon density="ldpi" src="resoruces/icon/idpi"/>
+  <icon density="ldpi" src="resoruces/icon/ldpi"/>
   <icon density="mdpi" src="resoruces/icon/mdpi.png"/>
   <icon density="hdpi" src="resoruces/icon/hdpi.png"/>
   <icon density="xhdpi" src="resoruces/icon/xhdpi.png"/>
