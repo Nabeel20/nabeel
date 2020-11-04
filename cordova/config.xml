@@ -8,7 +8,6 @@
     Balsam Dev
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
-  <platform name="android">
     <icon src='src/xxxhdpi'/>
-</platform>
+
 </widget>
