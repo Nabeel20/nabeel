@@ -8,5 +8,20 @@
     Balsam Dev
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
+  <platform name="android">
+  <preference name="SplashMaintainAspectRatio" value="true"/>
+    <icon density="ldpi" src="res/icon/ldpi.png"/>
+  <icon density="mdpi" src="res/icon/mdpi.png"/>
+  <icon density="hdpi" src="res/icon/hdpi.png"/>
+  <icon density="xhdpi" src="res/icon/xhdpi.png"/>
+  <icon density="xxhdpi" src="res/icon/xxhdpi.png"/>
+  <icon density="xxxhdpi" src="res/icon/xxxhdpi.png"/>
 
+  <splash density="port-ldpi" src="res/splash/splash-port-ldpi.png"/>
+  <splash density="port-mdpi" src="res/splash/splash-port-mdpi.png"/>
+  <splash density="port-hdpi" src="res/splash/splash-port-hdpi.png"/>
+  <splash density="port-xhdpi" src="res/splash/splash-port-xhdpi.png"/>
+  <splash density="port-xxhdpi" src="res/splash/splash-port-xxhdpi.png"/>
+  <splash density="port-xxxhdpi" src="res/splash/splash-port-xxxhdpi.png"/>
+  </platform>
 </widget>
