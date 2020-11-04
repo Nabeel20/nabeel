@@ -1,11 +1,14 @@
 import { contentView, app, fs, statusBar, navigationBar, TextView, Popover, NavigationView, ProgressBar, Page, Button, Stack, ScrollView, Composite, Row, navigationBar, TextInput } from 'tabris';
-import * as _ from "lodash";
+import { mean, map, replace, padStart, replcae, find, random, shuffle, uniqBy, findIndex, sum } from "lodash";
 import * as crypto from "crypto-js"
 const Hashids = require('hashids/cjs');
 const hash = new Hashids("nabeel adnan ali nizam", 12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
 
 
 app.idleTimeoutEnabled = false;
+app.onForeground(() => {
+  console.log('Balsam is ON');
+});
 app.registerFont('dubai', 'resoruces/Cairo.TTF');
 const success = '#00C853'
 const error = '#FF7171'
@@ -25,7 +28,14 @@ navigationBar.theme = 'dark'
 
 let db = [];
 let paid = []
-db = JSON.parse(secureStorage.getItem('db'))
+if (localStorage.getItem('db') == null) {
+  localStorage.setItem('db', JSON.stringify(db))
+}
+if (secureStorage.getItem('paid') == null) {
+  secureStorage.setItem('paid', JSON.stringify(paid))
+}
+
+db = JSON.parse(localStorage.getItem('db'))
 paid = JSON.parse(secureStorage.getItem('paid'));
 contentView.append(
   <$>
@@ -48,7 +58,7 @@ function Home() {
     )
   }
   let Subjects = () => {
-    let subjects = [...new Set(_.map(db, 'subject'))];
+    let subjects = [...new Set(map(db, 'subject'))];
     let output = []
     subjects.forEach(subject => {
       output.push(handle_subjects(subject))
@@ -168,8 +178,8 @@ function Home() {
   }
   function handle_subjects(subject) {
     if (db.length > 0) {
-      let underscore = _.replace(subject, ' ', '_');
-      let hash_subject = _.padStart(underscore, underscore.length + 1, '#');
+      let underscore = replace(subject, ' ', '_');
+      let hash_subject = padStart(underscore, underscore.length + 1, '#');
 
       return (
         <Composite highlightOnTouch background='#333431' cornerRadius={16} padding={10} onTap={() => filter_subjects(hash_subject)} >
@@ -179,7 +189,7 @@ function Home() {
     }
   }
   function filter_subjects(data) {
-    let underscore = _.replace(data, '_', ' ');
+    let underscore = replace(data, '_', ' ');
     let subject = underscore.split('');
     subject.shift();
     let filtred_subject = db.filter(file => file.subject == subject.join(''));
@@ -197,7 +207,7 @@ function Home() {
         db.unshift(de);
         // push paid to database
         if (de.paid) {
-          let bank = _.find(paid, (o) => o.code == de.code);
+          let bank = find(paid, (o) => o.code == de.code);
           if (bank !== undefined) {
             if (bank.paid == false) {
               de.paid = false
@@ -205,22 +215,22 @@ function Home() {
           }
           let paid_profile = {
             subject: de.subject,
-            ID: hash.encode(_.random(10000, 1000000)),
+            ID: hash.encode(random(10000, 1000000)),
             paid: de.paid,
             code: de.code
           }
 
           paid.push(paid_profile)
-          paid = _.uniqBy(paid, "code");
+          paid = uniqBy(paid, "code");
           secureStorage.setItem('paid', JSON.stringify(paid))
         }
         // update the UI and database
-        secureStorage.setItem('db', JSON.stringify(db))
+        localStorage.setItem('db', JSON.stringify(db))
         $('Files >Stack').only().children().dispose();
         db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
 
         $('Subjects > Row').only().children().dispose();
-        [...new Set(_.map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)));
+        [...new Set(map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)));
 
         // update the UI for achivement
         $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈`, visible: true });
@@ -249,14 +259,14 @@ function Home() {
   }
   function delete_file(title, index) {
     db = db.filter(file => file.title !== title);
-    secureStorage.setItem('db', JSON.stringify(db));
-    db = JSON.parse(secureStorage.getItem('db'));
+    localStorage.setItem('db', JSON.stringify(db));
+    db = JSON.parse(localStorage.getItem('db'));
 
     $(`Home > Stack > #files > #main`).children().dispose();
     $(`Home > Stack > #subjects > #row`).children().dispose();
 
     db.forEach(file => $(`Home > Stack > #files > #main`).only().append(handle_files(file)));
-    [...new Set(_.map(db, 'subject'))].forEach(subject => $(`Home > Stack > #subjects > #row`).only().append(handle_subjects(subject)));
+    [...new Set(map(db, 'subject'))].forEach(subject => $(`Home > Stack > #subjects > #row`).only().append(handle_subjects(subject)));
     $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈` });
     if (db.length == 0) {
       $('Home > #placeholder').set({ visible: true });
@@ -269,7 +279,7 @@ function Home() {
     let num_solved = [];
     let all = db.forEach(file => num_total.push(file.questionlist.length));
     let solved = db.filter(file => file.numOfQuiz > 0).forEach(file => num_solved.push(file.questionlist.length));
-    return Math.round((100 * _.sum(num_solved)) / _.sum(num_total))
+    return Math.round((100 * sum(num_solved)) / sum(num_total))
   }
   return (
     <Page background='#fffffe'>
@@ -293,9 +303,9 @@ function Exam(file) {
   let user_score = 0;
   let info = file.data
 
-  info.questionlist = _.shuffle(info.questionlist);
+  info.questionlist = shuffle(info.questionlist);
   for (let q of info.questionlist) {
-    q.choices = _.shuffle(q.choices)
+    q.choices = shuffle(q.choices)
   }
 
   let the_question = info.questionlist[score];
@@ -362,6 +372,9 @@ function Exam(file) {
         user_score++;
         $(`Choices > #b${right_index}`).set({ background: '#00C853' });
         $('Footer > #swipe_next').set({ visible: true });
+
+        $(ProgressBar).set({ state: 'error' });
+
         if (info.questionlist[score].qexplain.length > 3) {
           $('Footer > #explain').set({ visible: true });
         }
@@ -396,6 +409,9 @@ function Exam(file) {
       $(`Choices > Composite`).set({ background: '#D7D8D2' });
       $('Footer > #swipe_next').set({ visible: false });
       $('Footer > #explain').set({ visible: false });
+
+      $(ProgressBar).set({ state: "normal" });
+
       $(BottomSheet).animate({ opacity: 0, transform: { translationY: +100 } }, { delay: 0, duration: 500, easing: "linear" })
     }
   }
@@ -429,7 +445,7 @@ function Exam(file) {
       let nav = $('NavigationView > #exam');
       nav.dispose();
     } catch (error) {
-      console.log(error)
+      console.warn(error)
     }
 
   }
@@ -444,7 +460,7 @@ function Exam(file) {
     let balsam = ':)'
     let avarage = info.Accuracy;
     avarage.push(ratio);
-    let new_avarage = Math.round(_.mean(avarage));
+    let new_avarage = Math.round(mean(avarage));
 
     info.avarageAcc = new_avarage;
     info.numOfQuiz++;
@@ -495,7 +511,7 @@ function Exam(file) {
       event.preventDefault();
       popoer.close()
       goBack();
-      secureStorage.setItem('db', JSON.stringify(db))
+      localStorage.setItem('db', JSON.stringify(db))
     })
   }
 
@@ -562,12 +578,12 @@ function Activate() {
     let dehash = hash.decode(`${ID}`).toString();
     if (dehash.length > 0) {
       if (ev.text == dehash) {
-        let index = _.findIndex(paid, (o) => o.code == CODE);
+        let index = findIndex(paid, (o) => o.code == CODE);
         paid[index].paid = false;
         secureStorage.setItem('paid', JSON.stringify(paid))
         // activate all the local files:
         db.filter(file => file.code == CODE).forEach(f => f.paid = false);
-        secureStorage.setItem('db', JSON.stringify(db))
+        localStorage.setItem('db', JSON.stringify(db))
         show_snackbar('تم التفعيل بنجاح', success, '😃');
         go_home()
       } else {
@@ -590,7 +606,7 @@ function Activate() {
       let nav = $('NavigationView > #exam');
       nav.dispose();
     } catch (error) {
-      console.log(error)
+      console.warn(error)
     }
   }
 
