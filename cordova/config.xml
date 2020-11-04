@@ -9,9 +9,8 @@
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
   <platform name="android">
-  <icon density="ldpi" src="resoruces\ldpi"/>
   <icon density="mdpi" src="resoruces\mdpi.png"/>
-  <!-- <icon density="hdpi" src="resoruces/hdpi.png"/> -->
+  <icon density="hdpi" src="resoruces\hdpi.png"/> 
   <icon density="xhdpi" src="resoruces\xhdpi.png"/>
   <icon density="xxhdpi" src="resoruces\xxhdpi.png"/>
   <icon density="xxxhdpi" src="resoruces\xxxhdpi.png"/>
