@@ -8,6 +8,5 @@
     Balsam Dev
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
-    <icon src='src/xxxhdpi'/>
 
 </widget>
