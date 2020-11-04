@@ -6,9 +6,6 @@ const hash = new Hashids("nabeel adnan ali nizam", 12, "abcdefghijklmnopqrstuvwx
 
 
 app.idleTimeoutEnabled = false;
-app.onForeground(() => {
-  console.log('Balsam is ON');
-});
 app.registerFont('dubai', 'resoruces/Cairo.TTF');
 const success = '#00C853'
 const error = '#FF7171'
@@ -28,7 +25,7 @@ navigationBar.theme = 'dark'
 
 let db = [];
 let paid = []
-db = JSON.parse(localStorage.getItem('db'))
+db = JSON.parse(secureStorage.getItem('db'))
 paid = JSON.parse(secureStorage.getItem('paid'));
 contentView.append(
   <$>
@@ -218,7 +215,7 @@ function Home() {
           secureStorage.setItem('paid', JSON.stringify(paid))
         }
         // update the UI and database
-        localStorage.setItem('db', JSON.stringify(db))
+        secureStorage.setItem('db', JSON.stringify(db))
         $('Files >Stack').only().children().dispose();
         db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
 
@@ -252,8 +249,8 @@ function Home() {
   }
   function delete_file(title, index) {
     db = db.filter(file => file.title !== title);
-    localStorage.setItem('db', JSON.stringify(db));
-    db = JSON.parse(localStorage.getItem('db'));
+    secureStorage.setItem('db', JSON.stringify(db));
+    db = JSON.parse(secureStorage.getItem('db'));
 
     $(`Home > Stack > #files > #main`).children().dispose();
     $(`Home > Stack > #subjects > #row`).children().dispose();
@@ -432,7 +429,7 @@ function Exam(file) {
       let nav = $('NavigationView > #exam');
       nav.dispose();
     } catch (error) {
-      console.warn(error)
+      console.log(error)
     }
 
   }
@@ -498,7 +495,7 @@ function Exam(file) {
       event.preventDefault();
       popoer.close()
       goBack();
-      localStorage.setItem('db', JSON.stringify(db))
+      secureStorage.setItem('db', JSON.stringify(db))
     })
   }
 
@@ -570,7 +567,7 @@ function Activate() {
         secureStorage.setItem('paid', JSON.stringify(paid))
         // activate all the local files:
         db.filter(file => file.code == CODE).forEach(f => f.paid = false);
-        localStorage.setItem('db', JSON.stringify(db))
+        secureStorage.setItem('db', JSON.stringify(db))
         show_snackbar('تم التفعيل بنجاح', success, '😃');
         go_home()
       } else {
@@ -593,7 +590,7 @@ function Activate() {
       let nav = $('NavigationView > #exam');
       nav.dispose();
     } catch (error) {
-      console.warn(error)
+      console.log(error)
     }
   }
 

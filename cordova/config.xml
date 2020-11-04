@@ -10,4 +10,21 @@
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
   <preference name="android-minSdkVersion" value="21"/>
   <preference name="android-targetSdkVersion" value="23"/>
+  <platform name="android">
+  <preference name="SplashMaintainAspectRatio" value="true"/>
+  <preference name="SplashShowOnlyFirstTime" value="true"/>
+  <icon density="ldpi" src="resoruces/icon/idpi"/>
+  <icon density="mdpi" src="resoruces/icon/mdpi.png"/>
+  <icon density="hdpi" src="resoruces/icon/hdpi.png"/>
+  <icon density="xhdpi" src="resoruces/icon/xhdpi.png"/>
+  <icon density="xxhdpi" src="resoruces/icon/xxhdpi.png"/>
+  <icon density="xxxhdpi" src="resoruces/icon/xxxhdpi.png"/>
+<!--  Portrait  -->
+  <splash density="port-ldpi" src="resoruces/splash/splash-port-ldpi.png"/>
+  <splash density="port-mdpi" src="resoruces/splash/splash-port-mdpi.png"/>
+  <splash density="port-hdpi" src="resoruces/splash/splash-port-hdpi.png"/>
+  <splash density="port-xhdpi" src="resoruces/splash/splash-port-xhdpi.png"/>
+  <splash density="port-xxhdpi" src="resoruces/splash/splash-port-xxhdpi.png"/>
+  <splash density="port-xxxhdpi" src="resoruces/splash/splash-port-xxxhdpi.png"/>
+</platform>
 </widget>
