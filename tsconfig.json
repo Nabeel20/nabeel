@@ -4,7 +4,8 @@
     "target": "es6",
     "outDir": "./dist/",
     "lib": [
-      "es2017"
+      "es2017",
+      "esnext"
     ],
     "jsx": "react",
     "jsxFactory": "JSX.createElement",

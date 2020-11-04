@@ -1,50 +1,35 @@
-import { contentView, app, fs, TextView, Popover, NavigationView, ProgressBar, Page, Button, Stack, ScrollView, Composite, Row, navigationBar } from 'tabris';
+import { contentView, app, fs, statusBar, navigationBar, TextView, Popover, NavigationView, ProgressBar, Page, Button, Stack, ScrollView, Composite, Row, navigationBar, TextInput } from 'tabris';
 import * as _ from "lodash";
 import * as crypto from "crypto-js"
-// * app autoload 
-app.idleTimeoutEnabled = false;
-const database_path = fs.filesDir + '/database.txt';
+const Hashids = require('hashids/cjs');
+const hash = new Hashids("nabeel adnan ali nizam", 12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
 
+
+app.idleTimeoutEnabled = false;
 app.onForeground(() => {
   console.log('Balsam is ON');
 });
-
-
 app.registerFont('dubai', 'resoruces/Cairo.TTF');
-const success = '#14A38B'
+const success = '#00C853'
 const error = '#FF7171'
-const warrning = '#F2AC57'
+const warrning = '#FFA000'
 const brand = '#333431'
+const secondary = '#D7D8D2'
 const font_headline = 'bold 25px dubai';
-const font_body = 'bold 20px dubai '
+const font_body = 'bold 20px dubai ';
 
 
+//* theme 
+statusBar.background = brand
+statusBar.theme = 'dark'
+navigationBar.background = brand;
+navigationBar.theme = 'dark'
 
 
-
-
-
-let score = 0;
-let progress_score = 1;
-let wrong_asnwer = false;
-let index = null;
-let db = [
-  {
-    title: 'اختبار',
-    subject: 'تشريح', numOfQuiz: 0,
-    questionlist: [
-      { question: 'لماذا يرمز مجين الفيروسات عدداً قليلاً من البروتينات؟', qexplain: 'التفسير لا ينبغي أن يكون طويلاً لهذه الدرجة ولكن كتجربة يمكننا الاعتماد على هذا', right: 'المساعدة في عملية التضاعف الفيروسي', choices: ['المساعدة في عملية التضاعف الفيروسي', 'تَسهيل نقل الحمض النووي الفيروسي من خلية ثوي إلى أخرى', 'حماية مجين الفيروس من التعطيل بواسطة أنزيم النوكلياز ', 'تؤّمن التناظر البنيوي لجسيم الفيروس'] },
-      { question: 'ما الرقم الأكبر', qexplain: '', right: '4', choices: ['1', '2', '3', '4'] },
-      { question: 'ما الرقم الأصغر', qexplain: '', right: '1', choices: ['1', '2', '3', '4'] }],
-    cycle: '2020'
-  },
-  {
-    title: 'اختبار',
-    subject: 'بطاطا',
-    questionlist: [{ question: 'لماذا يرمز مجين الفيروسات عدداً قليلاً من البروتينات؟', right: 'المساعدة في عملية التضاعف الفيروسي', choices: ['المساعدة في عملية التضاعف الفيروسي', 'تَسهيل نقل الحمض النووي الفيروسي من خلية ثوي إلى أخرى', 'حماية مجين الفيروس من التعطيل بواسطة أنزيم النوكلياز ', 'تؤّمن التناظر البنيوي لجسيم الفيروس'] }],
-    cycle: '2020'
-  }
-]
+let db = [];
+let paid = []
+db = JSON.parse(localStorage.getItem('db'))
+paid = JSON.parse(secureStorage.getItem('paid'));
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
@@ -55,12 +40,13 @@ contentView.append(
 
 function Home() {
   let Toolbar = () => {
+    let achive = cal_achivement();
     return (
       <Composite stretchX >
         <TextView right centerY markupEnabled font='bold 25px dubai' text='بلسم' />
         <TextView right='prev() 5' centerY markupEnabled font='bold 16px dubai' text='💊' />
 
-        <TextView centerY font='bold 14px dubai' >الإحصائيات هنا</TextView>
+        <TextView id='achive' visible={false} centerY font='bold 15px dubai' textColor='#2E7D32' text={`نسبة إنجازك %${achive} 📈`} />
       </Composite>
     )
   }
@@ -71,15 +57,14 @@ function Home() {
       output.push(handle_subjects(subject))
     })
     return (
-      <ScrollView top='2' stretchX direction='horizontal' scrollbarVisible={false} right >
-        <Row id='subjcet' spacing={10} alignment='stretchX' right>
+      <ScrollView id='subjects' top='2' stretchX direction='horizontal' scrollbarVisible={false} right >
+        <Row id='row' spacing={10} alignment='stretchX' right>
           {output}
         </Row>
       </ScrollView>
     )
   }
   let Files = () => {
-    let database = db;
     let output = []
     db.forEach(file => {
       output.push(
@@ -88,7 +73,7 @@ function Home() {
     })
 
     return (
-      <ScrollView top='10' stretch direction='vertical' scrollbarVisible={false}>
+      <ScrollView id='files' top='10' stretch direction='vertical' scrollbarVisible={false}>
         <Stack id='main' spacing={15} stretchX alignment='stretchX' right >
           {output}
         </Stack>
@@ -97,60 +82,18 @@ function Home() {
   }
   let Add = () => {
     return (
-      <Composite centerX padding={14} cornerRadius={30} background='#333431' bottom={32} elevation={10} highlightOnTouch onTap={() => add_file()} >
+      <Composite centerX padding={14} cornerRadius={30} background='#333431' bottom={35} elevation={10} highlightOnTouch onTap={() => add_file()} >
         <TextView id='text' textColor='white' text='إضــافة ملــف +' font='bold 16px dubai' />
       </Composite>)
   }
   let Snackbar = () => {
     return (
       <Composite right={10} left={10} visible={false} stretchX padding={10} cornerRadius={3} background='#048243' bottom={16} elevation={5}>
-        <TextView id='text' right textColor='white' text='notification' font='bold 16px dubai' />
+        <TextView id='text' right text='notification' font='bold 16px dubai' />
         <TextView id='icon' left text='✅' font='bold 16px dubai' />
       </Composite>
     )
   }
-  let Exam_info = (file) => {
-    let info = file.data;
-    return (
-      <Popover>
-        <Stack centerY stretchX spacing={10} padding={16}>
-          <Stack stretchX>
-            <Button font='bold 14px  dubai' style='flat' background={error} text='حذف الملف' textColor='white' />
-            <Composite background='#333431' stretchX padding={20} cornerRadius={16}>
-              <TextView right text={info.title} textColor='white' font='bold 22px dubai' />
-              <TextView right top='prev() 1' textColor='white' text={info.subject} font='20px dubai' />
-            </Composite>
-          </Stack>
-
-
-          <Composite stretchX background='#F4D7D7' padding={16} cornerRadius={16}>
-            <TextView right text='💯' font='bold 20px dubai' />
-            <TextView right='prev() 3' text='متوسط الدقة' font='bold 20px dubai' />
-            <TextView left='3' text={info.accuracy} font='20px dubai' />
-          </Composite>
-
-          <Composite stretchX >
-            <Composite left='48%' right={0} background='#7BC8F6' padding={16} cornerRadius={16}>
-              <TextView right text='📄' font='bold 20px dubai' />
-              <TextView right='prev() 3' text='عدد الأسئلة' font='bold 20px dubai' />
-              <TextView top='prev() 2' centerX text={info.questionlist.length} font='20px dubai' />
-            </Composite>
-            <Composite left right='48%' background='#CFFDBC' padding={16} cornerRadius={16}>
-              <TextView right text='⚡️' font='bold 20px dubai' />
-              <TextView right='prev() 3' text='عدد مرات' font='bold 20px dubai' />
-              <TextView top='prev() 2' centerX text={info.numOfQuiz} font='20px dubai' />
-            </Composite>
-          </Composite>
-
-
-          <Composite stretchX padding={20} cornerRadius={16} highlightOnTouch background={info.paid ? error : success} onTap={() => { go_to_exam() }}>
-            <TextView centerX centerY text='خوض الامتحان' font='bold 20px dubai' />
-          </Composite>
-        </Stack>
-      </Popover>
-    )
-  }
-
 
   function Icon(file) {
     let data = file.subject;
@@ -177,12 +120,11 @@ function Home() {
           <Popover>
             <Stack centerY stretchX spacing={10} padding={16} onSwipeDown={() => popover.close()}>
               <Stack stretchX>
-                <Button font='bold 14px  dubai' style='flat' background={error} text='حذف الملف' textColor='white' />
+                <Button font='bold 14px  dubai' style='flat' background={error} text='حذف الملف' textColor='white' onSelect={() => { delete_file(file.title), popover.close() }} />
                 <Composite background='#333431' stretchX padding={16} cornerRadius={16}>
                   <TextView right left={0} top={0} text={file.title} textColor='white' font='bold 22px dubai' />
                   <TextView right top='prev() 1' textColor='white' text={file.subject} font='16px dubai' />
-                  <TextView right='prev() 10' bottom text={`دورة ${file.cycle}`} textColor={error} font='bold 16px dubai' />
-
+                  <TextView visible={file.cycle.length > 3 ? true : false} right='prev() 10' bottom text={`• دورة ${file.cycle}`} textColor={error} font='bold 16px dubai' />
                 </Composite>
               </Stack>
 
@@ -190,7 +132,7 @@ function Home() {
               <Composite stretchX background='#F4D7D7' padding={16} cornerRadius={16}>
                 <TextView right text='💯' font='bold 20px dubai' />
                 <TextView right='prev() 3' text='متوسط الدقة' font='bold 20px dubai' />
-                <TextView left='3' text='100' font='20px dubai' />
+                <TextView left='3' text={file.avarageAcc} font='20px dubai' />
               </Composite>
 
               <Composite stretchX >
@@ -206,13 +148,11 @@ function Home() {
                 </Composite>
               </Composite>
 
-
-              <Composite stretchX padding={18} cornerRadius={16} highlightOnTouch background={file.paid ? '#4CAF50' : '#66BB6A'} onTap={() => { go_to_exam(file), popover.close() }}>
-                <TextView centerX centerY text='خوض الامتحان' font='bold 20px dubai' />
+              <Composite stretchX padding={18} cornerRadius={16} highlightOnTouch background={file.paid ? error : success} onTap={() => { file.paid ? go_to_active() : go_to_exam(file), popover.close() }}>
+                <TextView centerX centerY text={file.paid ? 'تفعيل البنك' : 'خوض الامتحان'} font='bold 20px dubai' />
               </Composite>
             </Stack>
-            <TextView bottom={5} centerX text='للإغلاق اسحب للأسفل' font='15px dubai' textColor='#616161' />
-
+            <TextView bottom={5} centerX text='للإغلاق اسحب للأسفل' font='14px dubai' textColor='#616161' />
           </Popover>
         )
       }}>
@@ -230,13 +170,16 @@ function Home() {
     )
   }
   function handle_subjects(subject) {
-    let underscore = _.replace(subject, ' ', '_');
-    let hash_subject = _.padStart(underscore, underscore.length + 1, '#');
-    return (
-      <Composite highlightOnTouch background='#333431' cornerRadius={16} padding={10} onTap={() => filter_subjects(hash_subject)} >
-        <TextView text={hash_subject} textColor='white' markupEnabled font='15px dubai' />
-      </Composite>
-    )
+    if (db.length > 0) {
+      let underscore = _.replace(subject, ' ', '_');
+      let hash_subject = _.padStart(underscore, underscore.length + 1, '#');
+
+      return (
+        <Composite highlightOnTouch background='#333431' cornerRadius={16} padding={10} onTap={() => filter_subjects(hash_subject)} >
+          <TextView text={hash_subject} textColor='white' markupEnabled font='15px dubai' />
+        </Composite>
+      )
+    }
   }
   function filter_subjects(data) {
     let underscore = _.replace(data, '_', ' ');
@@ -246,16 +189,6 @@ function Home() {
     $('Files > Stack').only().children().dispose();
     filtred_subject.forEach(subject => { $('Files > Stack').only().append(handle_files(subject)) })
   }
-
-  async function save() {
-    if (await fs.appendToFile(database_path, JSON.stringify(db), 'utf-8')) {
-      console.info(`new file was created`)
-    } else {
-      console.info(` file already exist`)
-    }
-  }
-
-
   async function add_file() {
     try {
       let file = await fs.openFile({ type: 'text/plain', quantity: 'single' });
@@ -265,14 +198,41 @@ function Home() {
       let de = JSON.parse(en.toString(crypto.enc.Utf8));
       if (!db.some(file => file.title == de.title)) {
         db.unshift(de);
-        fs.removeFile(database_path)
-        save(db);
+        // push paid to database
+        if (de.paid) {
+          let bank = _.find(paid, (o) => o.code == de.code);
+          if (bank !== undefined) {
+            if (bank.paid == false) {
+              de.paid = false
+            }
+          }
+          let paid_profile = {
+            subject: de.subject,
+            ID: hash.encode(_.random(10000, 1000000)),
+            paid: de.paid,
+            code: de.code
+          }
+
+          paid.push(paid_profile)
+          paid = _.uniqBy(paid, "code");
+          secureStorage.setItem('paid', JSON.stringify(paid))
+        }
+        // update the UI and database
+        localStorage.setItem('db', JSON.stringify(db))
         $('Files >Stack').only().children().dispose();
         db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
 
         $('Subjects > Row').only().children().dispose();
-        [...new Set(_.map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)))
-        show_snackbar('تمت الإضافة بنجاح', success, '😃')
+        [...new Set(_.map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)));
+
+        // update the UI for achivement
+        $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈`, visible: true });
+
+
+        show_snackbar('تمت الإضافة بنجاح', success, '😃');
+        if (db.length > 0) {
+          $('Home > #placeholder').set({ visible: false })
+        }
       } else {
         show_snackbar('الملف موجود سلفاً ', warrning, '😕')
       }
@@ -290,23 +250,50 @@ function Home() {
       $(Snackbar).animate({ opacity: 1.0, transform: { translationY: 100 } }, { duration: 500, easing: 'linear' });
     }, 1500);
   }
+  function delete_file(title, index) {
+    db = db.filter(file => file.title !== title);
+    localStorage.setItem('db', JSON.stringify(db));
+    db = JSON.parse(localStorage.getItem('db'));
 
+    $(`Home > Stack > #files > #main`).children().dispose();
+    $(`Home > Stack > #subjects > #row`).children().dispose();
 
+    db.forEach(file => $(`Home > Stack > #files > #main`).only().append(handle_files(file)));
+    [...new Set(_.map(db, 'subject'))].forEach(subject => $(`Home > Stack > #subjects > #row`).only().append(handle_subjects(subject)));
+    $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈` });
+    if (db.length == 0) {
+      $('Home > #placeholder').set({ visible: true });
+      $('Home  > Stack> Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈`, visible: false })
+    }
+    show_snackbar('تم حذف الملف', warrning, '🗑');
+  }
+  function cal_achivement() {
+    let num_total = [];
+    let num_solved = [];
+    let all = db.forEach(file => num_total.push(file.questionlist.length));
+    let solved = db.filter(file => file.numOfQuiz > 0).forEach(file => num_solved.push(file.questionlist.length));
+    return Math.round((100 * _.sum(num_solved)) / _.sum(num_total))
+  }
   return (
     <Page background='#fffffe'>
       <Stack stretchX stretchY right={15} left={15} top={15} bottom={5} spacing={10}>
         <Toolbar />
-        <TextView text='المقررات:' font='16px dubai' right />
+        <TextView visible={db.length == 0 ? false : true} text='المقررات:' font='16px dubai' right />
         <Subjects />
         <Files />
       </Stack>
       <Add />
       <Snackbar />
+      <TextView id='placeholder' visible={db.length == 0 ? true : false} text='✨ بلسم يتمنى لك يوماً جميلاً ✨' font='20px dubai' center />
     </Page>
   )
 }
 
 function Exam(file) {
+  let score = 0;
+  let progress_score = 1;
+  let wrong_asnwer = false;
+  let user_score = 0;
   let info = file.data
 
   info.questionlist = _.shuffle(info.questionlist);
@@ -350,8 +337,8 @@ function Exam(file) {
   let Footer = () => {
     return (
       <Composite bottom={50} padding={16} stretchX right>
-        <TextView visible={false} id='explain' right text='للاطلاع على شرح السؤال اسحب للأعلى 👆' font=' 15px dubai' textColor='#455A64' />
-        <TextView visible={false} id='swipe_next' right top='prev() 3' text='للانتقال للسؤال التالي اسحب باتجاه اليمين 👉' font=' 15px dubai' textColor='#455A64' />
+        <TextView visible={false} id='explain' right bottom='next() 5' text='للاطلاع على شرح السؤال اسحب للأعلى 👆' font=' 15px dubai' textColor='#455A64' />
+        <TextView visible={false} id='swipe_next' right text='للانتقال للسؤال التالي اسحب باتجاه اليمين 👉' font=' 15px dubai' textColor='#455A64' />
       </Composite>
     )
   }
@@ -375,6 +362,7 @@ function Exam(file) {
         next_question();
       } else {
         wrong_asnwer = true;
+        user_score++;
         $(`Choices > #b${right_index}`).set({ background: '#00C853' });
         $('Footer > #swipe_next').set({ visible: true });
         if (info.questionlist[score].qexplain.length > 3) {
@@ -449,23 +437,70 @@ function Exam(file) {
 
   }
   function show_result() {
+    let length = info.questionlist.length;
+    let right = length - user_score;
+    let ratio = Math.round((100 * right) / length);
+    let output = `لديك ${user_score} سؤال خاطئ من أصل ${length} سؤال`;
+    if (user_score == 0) {
+      output = '🎉🎉 مبارك جميع الأسئلة صحيحة'
+    }
+    let balsam = ':)'
+    let avarage = info.Accuracy;
+    avarage.push(ratio);
+    let new_avarage = Math.round(_.mean(avarage));
+
+    info.avarageAcc = new_avarage;
+    info.numOfQuiz++;
+
+    switch (ratio) {
+      case ratio < 70:
+        balsam = '🏅'
+        break;
+      case ratio < 80:
+        balsam = '🥉'
+        break;
+      case ratio < 90:
+        balsam = '🥈'
+        break;
+      case ratio < 200:
+        balsam = '🥇'
+        break;
+      default:
+        balsam = '🎖'
+        break;
+    }
     const popoer = Popover.open(
-      <Popover >
-        <TextView center text='result' />
+      <Popover>
+        <Stack centerY stretchX spacing={10} padding={16}>
+          <Composite background={secondary} stretchX padding={16} cornerRadius={16}>
+            <TextView right font='45px' text='🎯' />
+            <TextView right='prev() 10' markupEnabled  >
+              <span font='20px dubai'>مستوى دقتك:</span> <br />
+              <span font='40px'>{`${ratio}%`}</span>
+            </TextView>
+            <TextView visible={user_score == 0 ? false : true} right='95%' font='bold 16px dubai' top='prev() 10' textColor={user_score == 0 ? success : error} text={output} />
+          </Composite>
+          <Composite background={secondary} stretchX padding={16} cornerRadius={16}>
+            <TextView centerY right markupEnabled >
+              <span font='16px dubai'>متوسط الدقة 🌟</span><br />
+              <span font='bold 20px dubai'> {info.subject}  </span>
+            </TextView>
+            <TextView left font='bold 35px' text={`${new_avarage}%`} />
+          </Composite>
+          <Composite background={secondary} stretchX padding={16} cornerRadius={16}>
+            <TextView centerY right font='20px dubai' text='تقييم بلسم ' />
+            <TextView left font='50px dubai' text={balsam} />
+          </Composite>
+        </Stack>
       </Popover>
     )
     app.onBackNavigation((event) => {
       event.preventDefault();
       popoer.close()
       goBack();
+      localStorage.setItem('db', JSON.stringify(db))
     })
   }
-  app.onBackNavigation(() => {
-    score = 0;
-    progress_score = 1
-    wrong_asnwer = false
-  })
-
 
   return (
     <Page id='exam'
@@ -473,7 +508,7 @@ function Exam(file) {
       onSwipeUp={() => { if (wrong_asnwer && info.questionlist[score].qexplain.length > 3) { show_BottomSheet() } }}
       onSwipeDown={() => $(BottomSheet).animate({ opacity: 0, transform: { translationY: +100 } }, { delay: 0, duration: 500, easing: "linear" })}
     >
-      <ProgressBar tintColor={brand} selection={progress_score} stretchX top maximum={info.questionlist.length} />
+      <ProgressBar tintColor={success} selection={progress_score} stretchX top maximum={info.questionlist.length} />
       <Stack top={30} stretchX padding={16} spacing={10}>
         <TextView right markupEnabled font='bold 15px dubai' textColor='#455A64'>
           <span>{info.subject}</span> / <span>{info.title}</span>
@@ -491,4 +526,85 @@ function Exam(file) {
 function go_to_exam(file) {
   let nav = $(NavigationView).only();
   nav.append(<Exam data={file} />)
-} 
+}
+
+function go_to_active(file) {
+  let nav = $(NavigationView).only();
+  nav.append(<Activate />)
+}
+
+function Activate() {
+  let Paid = () => {
+    let output = [];
+
+    paid.filter(file => file.paid == true).forEach(file => {
+      output.push(
+        <Composite stretchX background='#D7D8D2' cornerRadius={15} padding={16} >
+          <TextView right text={file.subject} font='bold 20px dubai' />
+          <TextView selectable={true} left text={file.ID} font='bold 20px dubai' />
+          <TextInput keyboard='number' stretch top='prev() 15' message='أدخل المفتاح' style='underline' onAccept={(ev) => handle_accept(ev, file.ID, file.code)} />
+        </Composite>
+      )
+    })
+
+    return (<ScrollView top='10' stretch direction='vertical' scrollbarVisible={false}>
+      <Stack spacing={15} stretchX alignment='stretchX' right >
+        {output}
+      </Stack>
+    </ScrollView>);
+  }
+  let Snackbar = () => {
+    return (
+      <Composite right={10} left={10} visible={false} stretchX padding={10} cornerRadius={3} background='#048243' bottom={16} elevation={5}>
+        <TextView id='text' right text='notification' font='bold 16px dubai' />
+        <TextView id='icon' left text='✅' font='bold 16px dubai' />
+      </Composite>
+    )
+  }
+  function handle_accept(ev, ID, CODE) {
+    let dehash = hash.decode(`${ID}`).toString();
+    if (dehash.length > 0) {
+      if (ev.text == dehash) {
+        let index = _.findIndex(paid, (o) => o.code == CODE);
+        paid[index].paid = false;
+        secureStorage.setItem('paid', JSON.stringify(paid))
+        // activate all the local files:
+        db.filter(file => file.code == CODE).forEach(f => f.paid = false);
+        localStorage.setItem('db', JSON.stringify(db))
+        show_snackbar('تم التفعيل بنجاح', success, '😃');
+        go_home()
+      } else {
+        show_snackbar('المفتاح غير مناسب', error, '😐')
+      }
+    }
+  }
+  function show_snackbar(text, color, icon) {
+    $('Snackbar > #text').set({ text: text });
+    $(Snackbar).set({ background: color })
+    $('Snackbar > #icon').set({ text: icon });
+    $(Snackbar).set({ visible: true, transform: { translationY: 100 } });
+    $(Snackbar).animate({ opacity: 1.0, transform: { translationX: 0 } }, { duration: 500, easing: 'ease-out' });
+    setTimeout(() => {
+      $(Snackbar).animate({ opacity: 1.0, transform: { translationY: 100 } }, { duration: 500, easing: 'linear' });
+    }, 1500);
+  }
+  function go_home() {
+    try {
+      let nav = $('NavigationView > #exam');
+      nav.dispose();
+    } catch (error) {
+      console.warn(error)
+    }
+  }
+
+  return (
+    <Page id='activate'>
+      <Stack stretchX stretchY right={15} left={15} top={15} bottom={15} spacing={10}>
+        <TextView right text='قائمة تفعيل الملفات' font='bold 21px dubai' />
+        <TextView font='16px dubai' right={1} left={0} bottom={1} text='اشتر الكود من المكتبة ثم ارسل الكود والرمز الخاص بك على التلغرام' />
+        <Paid />
+      </Stack>
+      <Snackbar />
+    </Page>
+  )
+}
