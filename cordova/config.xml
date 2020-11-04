@@ -8,11 +8,7 @@
     Balsam Dev
   </author>
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
-  <preference name="android-minSdkVersion" value="21"/>
-  <preference name="android-targetSdkVersion" value="23"/>
   <platform name="android">
-  <preference name="SplashMaintainAspectRatio" value="true"/>
-  <preference name="SplashShowOnlyFirstTime" value="true"/>
   <icon density="ldpi" src="resoruces/icon/idpi"/>
   <icon density="mdpi" src="resoruces/icon/mdpi.png"/>
   <icon density="hdpi" src="resoruces/icon/hdpi.png"/>
