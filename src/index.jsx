@@ -6,6 +6,9 @@ const hash = new Hashids("nabeel adnan ali nizam", 12, "abcdefghijklmnopqrstuvwx
 
 
 app.idleTimeoutEnabled = false;
+app.onForeground(() => {
+  console.log('Balsam is ON');
+});
 app.registerFont('dubai', 'resoruces/Cairo.TTF');
 const success = '#00C853'
 const error = '#FF7171'
@@ -22,18 +25,37 @@ statusBar.theme = 'dark'
 navigationBar.background = brand;
 navigationBar.theme = 'dark'
 
-
 let db = [];
 let paid = []
-if (secureStorage.getItem('db') == null) {
-  secureStorage.setItem('db', JSON.stringify(db))
+const path = fs.filesDir + '/files.json'
+//* check if the file is already exist
+if (fs.isFile(path) == false) {
+  let en = crypto.AES.encrypt(JSON.stringify(db))
+  async () => await fs.writeFile(path, en, 'utf-8');
 }
+//* calling the fucntion
+async function read() {
+  let files_db = await fs.readFile(path, 'utf-8');
+  let en = crypto.AES.decrypt(files_db, "nabeel adnan ali nizam");
+  let de = JSON.parse(en.toString(crypto.enc.Utf8));
+  db = JSON.parse(de);
+  // why no go call handle_files()
+  let nav = $(NavigationView).only();
+  nav.children().dispose();
+  nav.append(<Home />)
+}
+if (fs.isFile(path)) {
+  read();
+}
+
+
+
 if (secureStorage.getItem('paid') == null) {
   secureStorage.setItem('paid', JSON.stringify(paid))
 }
-
-db = JSON.parse(secureStorage.getItem('db'))
 paid = JSON.parse(secureStorage.getItem('paid'));
+
+
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
@@ -222,7 +244,8 @@ function Home() {
           secureStorage.setItem('paid', JSON.stringify(paid))
         }
         // update the UI and database
-        secureStorage.setItem('db', JSON.stringify(db))
+        //! localStorage.setItem('db', JSON.stringify(db))
+        await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
         $('Files >Stack').only().children().dispose();
         db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
 
@@ -254,10 +277,12 @@ function Home() {
       $(Snackbar).animate({ opacity: 1.0, transform: { translationY: 100 } }, { duration: 500, easing: 'linear' });
     }, 1500);
   }
-  function delete_file(title, index) {
+  async function delete_file(title, index) {
     db = db.filter(file => file.title !== title);
-    secureStorage.setItem('db', JSON.stringify(db));
-    db = JSON.parse(secureStorage.getItem('db'));
+    //!  localStorage.setItem('db', JSON.stringify(db));
+    await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
+    //? I think no need to get the data here
+    //? db = JSON.parse(localStorage.getItem('db'));
 
     $(`Home > Stack > #files > #main`).children().dispose();
     $(`Home > Stack > #subjects > #row`).children().dispose();
@@ -278,19 +303,22 @@ function Home() {
     let solved = db.filter(file => file.numOfQuiz > 0).forEach(file => num_solved.push(file.questionlist.length));
     return Math.round((100 * sum(num_solved)) / sum(num_total))
   }
-  return (
-    <Page background='#fffffe'>
-      <Stack stretchX stretchY right={15} left={15} top={15} bottom={5} spacing={10}>
-        <Toolbar />
-        <TextView visible={db.length == 0 ? false : true} text='المقررات:' font='16px dubai' right />
-        <Subjects />
-        <Files />
-      </Stack>
-      <Add />
-      <Snackbar />
-      <TextView id='placeholder' visible={db.length == 0 ? true : false} text='✨ بلسم يتمنى لك يوماً جميلاً ✨' font='20px dubai' center />
-    </Page>
-  )
+
+  //console.log children then if length == 1 app.onbcak => show the whole list?
+  if ($(NavigationView))
+    return (
+      <Page background='#fffffe'>
+        <Stack stretchX stretchY right={15} left={15} top={15} bottom={5} spacing={10}>
+          <Toolbar />
+          <TextView visible={db.length == 0 ? false : true} text='المقررات:' font='16px dubai' right />
+          <Subjects />
+          <Files />
+        </Stack>
+        <Add />
+        <Snackbar />
+        <TextView id='placeholder' visible={db.length == 0 ? true : false} text='✨ بلسم يتمنى لك يوماً جميلاً ✨' font='20px dubai' center />
+      </Page>
+    )
 }
 
 function Exam(file) {
@@ -434,10 +462,11 @@ function Exam(file) {
       easing: 'ease-out'
     });
   }
-  function goBack() {
+  async function goBack() {
     score = 0;
     progress_score = 1
     wrong_asnwer = false
+    await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
     try {
       let nav = $('NavigationView > #exam');
       nav.dispose();
@@ -505,10 +534,9 @@ function Exam(file) {
       </Popover>
     )
     app.onBackNavigation((event) => {
-      event.preventDefault();
       popoer.close()
       goBack();
-      secureStorage.setItem('db', JSON.stringify(db))
+      //!  localStorage.setItem('db', JSON.stringify(db))
     })
   }
 
@@ -571,7 +599,7 @@ function Activate() {
       </Composite>
     )
   }
-  function handle_accept(ev, ID, CODE) {
+  async function handle_accept(ev, ID, CODE) {
     let dehash = hash.decode(`${ID}`).toString();
     if (dehash.length > 0) {
       if (ev.text == dehash) {
@@ -580,7 +608,9 @@ function Activate() {
         secureStorage.setItem('paid', JSON.stringify(paid))
         // activate all the local files:
         db.filter(file => file.code == CODE).forEach(f => f.paid = false);
-        secureStorage.setItem('db', JSON.stringify(db))
+        //!  localStorage.setItem('db', JSON.stringify(db))
+        await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
+
         show_snackbar('تم التفعيل بنجاح', success, '😃');
         go_home()
       } else {
@@ -618,3 +648,16 @@ function Activate() {
     </Page>
   )
 }
+
+
+
+var configuration = {
+  // Mandatory.
+  apiKey: 'aaa7ae78-e91b-4949-8884-4243e4510786',
+  // Optional.
+  locationTracking: true,
+  handleFirstActivationAsUpdate: true,
+  sessionTimeout: 15
+}
+// Initializing the AppMetrica SDK.
+window.appMetrica.activate(configuration);

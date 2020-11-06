@@ -10,7 +10,7 @@
   <preference name="EnableDeveloperConsole" value="$IS_DEBUG" />
   <platform name="android">
   <preference name="SplashMaintainAspectRatio" value="true"/>
-    <icon density="ldpi" src="res/icon/ldpi.png"/>
+  <icon density="ldpi" src="res/icon/ldpi.png"/>
   <icon density="mdpi" src="res/icon/mdpi.png"/>
   <icon density="hdpi" src="res/icon/hdpi.png"/>
   <icon density="xhdpi" src="res/icon/xhdpi.png"/>
@@ -24,4 +24,13 @@
   <splash density="port-xxhdpi" src="res/splash/splash-port-xxhdpi.png"/>
   <splash density="port-xxxhdpi" src="res/splash/splash-port-xxxhdpi.png"/>
   </platform>
+  <plugin name="yandex-appmetrica-plugin-cordova" spec="^1.0.0" />
+  <preference name="android-minSdkVersion" value="21"/>
+  <preference name="android-targetSdkVersion" value="23"/>
+
+  <style name="Theme.Balsam" parent="@style/Theme.Tabris.Light.DarkAppBar">
+        <item name="colorPrimary">#333431</item>
+        <item name="colorPrimaryDark">#333431</item>
+        <item name="colorAccent">#333431/item>
+  </style>
 </widget>
