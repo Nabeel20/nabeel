@@ -28,7 +28,8 @@ let db = [];
 let paid = []
 let path = fs.filesDir + '/blsm.json'
 if (fs.isFile(path) == false) {
-  write()
+  write();
+  read();
 } else {
   read()
 }
