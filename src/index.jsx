@@ -1,15 +1,13 @@
 import { contentView, app, fs, statusBar, navigationBar, TextView, Popover, NavigationView, ProgressBar, Page, Button, Stack, ScrollView, Composite, Row, navigationBar, TextInput } from 'tabris';
-import { mean, map, replace, padStart, replcae, find, random, shuffle, uniqBy, findIndex, sum } from "lodash";
+import { mean, map, replace, padStart, replcae, find, random, shuffle, uniqBy, findIndex, sum, repeat } from "lodash";
 import * as crypto from "crypto-js"
 const Hashids = require('hashids/cjs');
 const hash = new Hashids("nabeel adnan ali nizam", 12, "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789")
 
 
 app.idleTimeoutEnabled = false;
-app.onForeground(() => {
-  console.log('Balsam is ON');
-});
 app.registerFont('dubai', 'resoruces/Cairo.TTF');
+
 const success = '#00C853'
 const error = '#FF7171'
 const warrning = '#FFA000'
@@ -25,29 +23,15 @@ statusBar.theme = 'dark'
 navigationBar.background = brand;
 navigationBar.theme = 'dark'
 
+
 let db = [];
 let paid = []
-const path = fs.filesDir + '/files.json'
-//* check if the file is already exist
+let path = fs.filesDir + '/blsm.json'
 if (fs.isFile(path) == false) {
-  let en = crypto.AES.encrypt(JSON.stringify(db))
-  async () => await fs.writeFile(path, en, 'utf-8');
+  write()
+} else {
+  read()
 }
-//* calling the fucntion
-async function read() {
-  let files_db = await fs.readFile(path, 'utf-8');
-  let en = crypto.AES.decrypt(files_db, "nabeel adnan ali nizam");
-  let de = JSON.parse(en.toString(crypto.enc.Utf8));
-  db = JSON.parse(de);
-  // why no go call handle_files()
-  let nav = $(NavigationView).only();
-  nav.children().dispose();
-  nav.append(<Home />)
-}
-if (fs.isFile(path)) {
-  read();
-}
-
 
 
 if (secureStorage.getItem('paid') == null) {
@@ -55,24 +39,40 @@ if (secureStorage.getItem('paid') == null) {
 }
 paid = JSON.parse(secureStorage.getItem('paid'));
 
+async function write() {
+  let en = crypto.AES.encrypt(JSON.stringify(db), 'Nabeel Adnan Ali Nizam, Mom I love you').toString()
+  await fs.writeFile(path, en, 'utf-8')
+}
+
+async function read() {
+  let blsm_json = await fs.readFile(path, 'utf-8');
+  let de = crypto.AES.decrypt(blsm_json, 'Nabeel Adnan Ali Nizam, Mom I love you').toString(crypto.enc.Utf8);
+  db = JSON.parse(de);
+  $(NavigationView).only().append(<Home />)
+}
+
 
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
-      <Home />
     </NavigationView>
   </$>
 );
 
 function Home() {
   let Toolbar = () => {
-    let achive = cal_achivement();
+    let achive = 0
+    if (db.length > 0) {
+      achive = cal_achivement();
+    }
     return (
       <Composite stretchX >
         <TextView right centerY markupEnabled font='bold 25px dubai' text='بلسم' />
         <TextView right='prev() 5' centerY markupEnabled font='bold 16px dubai' text='💊' />
 
-        <TextView id='achive' visible={false} centerY font='bold 15px dubai' textColor='#2E7D32' text={`نسبة إنجازك %${achive} 📈`} />
+        <Composite centerY background={success} width={30} height={30} cornerRadius={15} left>
+          <TextView id='achive' centerY centerX textColor='white' text={achive} />
+        </Composite>
       </Composite>
     )
   }
@@ -125,14 +125,32 @@ function Home() {
     let data = file.subject;
     let output;
     switch (data.subject) {
-      case 'تشريح':
-        output = '🔥'
+      case 'تشريح العصبية':
+        output = '🧠'
         break;
-      case 'بطاطا':
-        output = '🥔'
+      case 'تشريح':
+        output = '🗡'
+        break;
+      case 'الأحياء الدقيقة':
+        output = '🦠'
+        break;
+      case 'فيزيولوجيا':
+        output = '💉'
+        break;
+      case 'الكيمياء الحيوية':
+        output = '🧪'
+        break;
+      case 'الإحصاء الطبي':
+        output = '🔢'
+        break;
+      case 'الأخلاقيات الطبية':
+        output = '🍎'
+        break;
+      case 'المهارات السريرية':
+        output = '🩺'
         break;
       default:
-        output = '📕'
+        output = '📔'
         break;
     }
     return (
@@ -213,7 +231,7 @@ function Home() {
     subject.shift();
     let filtred_subject = db.filter(file => file.subject == subject.join(''));
     $('Files > Stack').only().children().dispose();
-    filtred_subject.forEach(subject => { $('Files > Stack').only().append(handle_files(subject)) })
+    filtred_subject.forEach(subject => { $('Files > Stack').only().append(handle_files(subject)) });
   }
   async function add_file() {
     try {
@@ -244,8 +262,7 @@ function Home() {
           secureStorage.setItem('paid', JSON.stringify(paid))
         }
         // update the UI and database
-        //! localStorage.setItem('db', JSON.stringify(db))
-        await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
+        write()
         $('Files >Stack').only().children().dispose();
         db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
 
@@ -253,8 +270,7 @@ function Home() {
         [...new Set(map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)));
 
         // update the UI for achivement
-        $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈`, visible: true });
-
+        $('Home  > Stack > #subjects_name').set({ visible: true });
 
         show_snackbar('تمت الإضافة بنجاح', success, '😃');
         if (db.length > 0) {
@@ -277,48 +293,49 @@ function Home() {
       $(Snackbar).animate({ opacity: 1.0, transform: { translationY: 100 } }, { duration: 500, easing: 'linear' });
     }, 1500);
   }
-  async function delete_file(title, index) {
+  function delete_file(title, index) {
     db = db.filter(file => file.title !== title);
-    //!  localStorage.setItem('db', JSON.stringify(db));
-    await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
-    //? I think no need to get the data here
-    //? db = JSON.parse(localStorage.getItem('db'));
+    write();
+
 
     $(`Home > Stack > #files > #main`).children().dispose();
     $(`Home > Stack > #subjects > #row`).children().dispose();
 
     db.forEach(file => $(`Home > Stack > #files > #main`).only().append(handle_files(file)));
     [...new Set(map(db, 'subject'))].forEach(subject => $(`Home > Stack > #subjects > #row`).only().append(handle_subjects(subject)));
-    $('Home  > Stack > Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈` });
+    if (db.length > 0) {
+      $('Home  > Stack > Toolbar > Composite > #achive').set({ text: cal_achivement() });
+    }
+
     if (db.length == 0) {
       $('Home > #placeholder').set({ visible: true });
-      $('Home  > Stack> Toolbar > #achive').set({ text: `نسبة إنجازك %${cal_achivement()} 📈`, visible: false })
+      $('Home  > Stack > #subjects_name').set({ visible: false });
+      $('Home  > Stack > Toolbar > Composite > #achive').set({ text: 0 });
+
     }
     show_snackbar('تم حذف الملف', warrning, '🗑');
   }
-  function cal_achivement() {
-    let num_total = [];
-    let num_solved = [];
-    let all = db.forEach(file => num_total.push(file.questionlist.length));
-    let solved = db.filter(file => file.numOfQuiz > 0).forEach(file => num_solved.push(file.questionlist.length));
-    return Math.round((100 * sum(num_solved)) / sum(num_total))
-  }
 
-  //console.log children then if length == 1 app.onbcak => show the whole list?
-  if ($(NavigationView))
-    return (
-      <Page background='#fffffe'>
-        <Stack stretchX stretchY right={15} left={15} top={15} bottom={5} spacing={10}>
-          <Toolbar />
-          <TextView visible={db.length == 0 ? false : true} text='المقررات:' font='16px dubai' right />
-          <Subjects />
-          <Files />
-        </Stack>
-        <Add />
-        <Snackbar />
-        <TextView id='placeholder' visible={db.length == 0 ? true : false} text='✨ بلسم يتمنى لك يوماً جميلاً ✨' font='20px dubai' center />
-      </Page>
-    )
+  return (
+    <Page background='#fffffe'>
+      <Stack stretchX stretchY right={15} left={15} top={15} bottom={5} spacing={10}>
+        <Toolbar />
+        <TextView id='subjects_name' visible={db.length == 0 ? false : true} text='المقررات:' font='16px dubai' right />
+        <Subjects />
+        <Files />
+
+      </Stack>
+      <Add />
+      <Snackbar />
+      <Composite id='placeholder' padding={16} visible={db.length == 0 ? true : false} stretchX stretchY top='8%'>
+        <TextView right font='16px dubai' text='Telegram: @Balsam_app 👆' onTap={() => app.launch('https://t.me/Balsam_app')} />
+        <TextView left font='bold 16px dubai' textColor={success} text='نسبة إنجازك 👆' />
+
+        <TextView text='✨ بلسم يتمنى لك يوماً جميلاً ✨' font='20px dubai' center />
+
+      </Composite>
+    </Page>
+  )
 }
 
 function Exam(file) {
@@ -462,18 +479,13 @@ function Exam(file) {
       easing: 'ease-out'
     });
   }
-  async function goBack() {
+  function goBack() {
     score = 0;
     progress_score = 1
-    wrong_asnwer = false
-    await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
-    try {
-      let nav = $('NavigationView > #exam');
-      nav.dispose();
-    } catch (error) {
-      console.warn(error)
-    }
-
+    wrong_asnwer = false;
+    let nav = $('NavigationView > #exam');
+    nav.dispose()
+    $('Home  > Stack > Toolbar > Composite > #achive').set({ text: cal_achivement() });
   }
   function show_result() {
     let length = info.questionlist.length;
@@ -483,7 +495,6 @@ function Exam(file) {
     if (user_score == 0) {
       output = '🎉🎉 مبارك جميع الأسئلة صحيحة'
     }
-    let balsam = ':)'
     let avarage = info.Accuracy;
     avarage.push(ratio);
     let new_avarage = Math.round(mean(avarage));
@@ -491,23 +502,18 @@ function Exam(file) {
     info.avarageAcc = new_avarage;
     info.numOfQuiz++;
 
-    switch (ratio) {
-      case ratio < 70:
-        balsam = '🏅'
-        break;
-      case ratio < 80:
-        balsam = '🥉'
-        break;
-      case ratio < 90:
-        balsam = '🥈'
-        break;
-      case ratio < 200:
-        balsam = '🥇'
-        break;
-      default:
-        balsam = '🎖'
-        break;
-    }
+    let balsam;
+    if (ratio < 10) { balsam = repeat('😫', 3) }
+    if (ratio < 20) { balsam = repeat('😞', 3) }
+    if (ratio < 30) { balsam = repeat('😣', 3) }
+    if (ratio < 40) { balsam = repeat('😭', 3) }
+    if (ratio < 50) { balsam = repeat('😔', 3) }
+    if (ratio < 60) { balsam = repeat('😰', 3) }
+    if (ratio < 70) { balsam = repeat('🙂', 3) }
+    if (ratio < 80) { balsam = repeat('🙂', 3) }
+    if (ratio < 90) { balsam = repeat('🙂', 3) }
+    if (ratio < 100) { balsam = repeat('🙂', 3) }
+
     const popoer = Popover.open(
       <Popover>
         <Stack centerY stretchX spacing={10} padding={16}>
@@ -524,19 +530,18 @@ function Exam(file) {
               <span font='16px dubai'>متوسط الدقة 🌟</span><br />
               <span font='bold 20px dubai'> {info.subject}  </span>
             </TextView>
-            <TextView left font='bold 35px' text={`${new_avarage}%`} />
+            <TextView left centerY font='bold 35px' text={`${new_avarage}%`} />
           </Composite>
-          <Composite background={secondary} stretchX padding={16} cornerRadius={16}>
-            <TextView centerY right font='20px dubai' text='تقييم بلسم ' />
-            <TextView left font='50px dubai' text={balsam} />
-          </Composite>
+          <TextView font='20px dubai' centerX text={balsam} />
         </Stack>
       </Popover>
     )
+
+
     app.onBackNavigation((event) => {
       popoer.close()
       goBack();
-      //!  localStorage.setItem('db', JSON.stringify(db))
+      write();
     })
   }
 
@@ -579,7 +584,7 @@ function Activate() {
       output.push(
         <Composite stretchX background='#D7D8D2' cornerRadius={15} padding={16} >
           <TextView right text={file.subject} font='bold 20px dubai' />
-          <TextView selectable={true} left text={file.ID} font='bold 20px dubai' />
+          <TextView left text={file.ID} font='bold 20px dubai' onTap={() => { share(file) }} />
           <TextInput keyboard='number' stretch top='prev() 15' message='أدخل المفتاح' style='underline' onAccept={(ev) => handle_accept(ev, file.ID, file.code)} />
         </Composite>
       )
@@ -599,7 +604,7 @@ function Activate() {
       </Composite>
     )
   }
-  async function handle_accept(ev, ID, CODE) {
+  function handle_accept(ev, ID, CODE) {
     let dehash = hash.decode(`${ID}`).toString();
     if (dehash.length > 0) {
       if (ev.text == dehash) {
@@ -608,11 +613,9 @@ function Activate() {
         secureStorage.setItem('paid', JSON.stringify(paid))
         // activate all the local files:
         db.filter(file => file.code == CODE).forEach(f => f.paid = false);
-        //!  localStorage.setItem('db', JSON.stringify(db))
-        await fs.writeFile(path, crypto.AES.encrypt(JSON.stringify(db)), 'utf-8')
-
+        write()
         show_snackbar('تم التفعيل بنجاح', success, '😃');
-        go_home()
+        // go_home()
       } else {
         show_snackbar('المفتاح غير مناسب', error, '😐')
       }
@@ -628,36 +631,36 @@ function Activate() {
       $(Snackbar).animate({ opacity: 1.0, transform: { translationY: 100 } }, { duration: 500, easing: 'linear' });
     }, 1500);
   }
-  function go_home() {
-    try {
-      let nav = $('NavigationView > #exam');
-      nav.dispose();
-    } catch (error) {
-      console.warn(error)
-    }
+  function share(file) {
+    app.share({
+      title: 'أرسل الرمز للمطوّر',
+      text: `الرمز الخاص بي لتفعيل مادة [${file.subject}]:
+       ${file.ID}`
+    }).catch((error) => {
+      show_snackbar('لم تتم مشاركة الرمز', warrning, '😟')
+    });
   }
 
   return (
     <Page id='activate'>
       <Stack stretchX stretchY right={15} left={15} top={15} bottom={15} spacing={10}>
         <TextView right text='قائمة تفعيل الملفات' font='bold 21px dubai' />
-        <TextView font='16px dubai' right={1} left={0} bottom={1} text='اشتر الكود من المكتبة ثم ارسل الكود والرمز الخاص بك على التلغرام' />
+        <TextView font='14px dubai' markupEnabled right={1} left={0} bottom={1}>
+          <span>لتفعيل بنك مدفوع لبلسم نتبع الخطوات التالية:</span> <br />
+          <span>1️⃣ اشتر من فضلك كود التفعيل من المكتبة المعتمدة</span> <br />
+          <span>2️⃣ ارسل رمز المادة والكود الذي اشتريته للمطور عن طريق الضغط على الرمز يسار المادة Balsam_dev@</span> <br />
+          <span>3️⃣ سنرسل لك مفتاح التفعيل بأسرع وقت ممكن 😌</span> <br />
+        </TextView>
         <Paid />
       </Stack>
       <Snackbar />
     </Page>
   )
 }
-
-
-
-var configuration = {
-  // Mandatory.
-  apiKey: 'aaa7ae78-e91b-4949-8884-4243e4510786',
-  // Optional.
-  locationTracking: true,
-  handleFirstActivationAsUpdate: true,
-  sessionTimeout: 15
+function cal_achivement() {
+  let num_total = [];
+  let num_solved = [];
+  let all = db.forEach(file => num_total.push(file.questionlist.length));
+  let solved = db.filter(file => file.numOfQuiz > 0).forEach(file => num_solved.push(file.questionlist.length));
+  return Math.round((100 * sum(num_solved)) / sum(num_total))
 }
-// Initializing the AppMetrica SDK.
-window.appMetrica.activate(configuration);

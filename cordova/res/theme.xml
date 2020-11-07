@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.Balsam" parent="@style/Theme.Tabris.Light.DarkAppBar">
+        <item name="colorPrimary">#33343</item>
+        <item name="colorPrimaryDark">#33343</item>
+        <item name="colorAccent">#33343</item>
+    </style>
+
+</resources>
