@@ -28,12 +28,10 @@ let db = [];
 let paid = []
 let path = fs.filesDir + '/blsm.json'
 if (fs.isFile(path) == false) {
-  write();
-  read();
+  write().then(() => read());
 } else {
-  read()
+  read();
 }
-
 
 if (secureStorage.getItem('paid') == null) {
   secureStorage.setItem('paid', JSON.stringify(paid))
@@ -56,10 +54,11 @@ async function read() {
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
-    <Home />
     </NavigationView>
   </$>
 );
+
+
 
 function Home() {
   let Toolbar = () => {
@@ -148,7 +147,7 @@ function Home() {
       case 'الأخلاقيات الطبية':
         output = '🍎'
         break;
-      case 'المهارات السريرية':
+      case 'مهارات السريرية':
         output = '🩺'
         break;
       default:
@@ -264,9 +263,10 @@ function Home() {
           secureStorage.setItem('paid', JSON.stringify(paid))
         }
         // update the UI and database
-        write()
-        $('Files >Stack').only().children().dispose();
-        db.forEach(file => $('Files >Stack').only().append(handle_files(file)));
+        write().then(() => show_snackbar('تمت الإضافة بنجاح', success, '😃'));
+        // write();
+        $('Files > #main').only().children().dispose();
+        db.forEach(file => $('Files > Stack').only().append(handle_files(file)));
 
         $('Subjects > Row').only().children().dispose();
         [...new Set(map(db, 'subject'))].forEach(subject => $('Subjects > Row').only().append(handle_subjects(subject)));
@@ -274,7 +274,6 @@ function Home() {
         // update the UI for achivement
         $('Home  > Stack > #subjects_name').set({ visible: true });
 
-        show_snackbar('تمت الإضافة بنجاح', success, '😃');
         if (db.length > 0) {
           $('Home > #placeholder').set({ visible: false })
         }
@@ -282,7 +281,8 @@ function Home() {
         show_snackbar('الملف موجود سلفاً ', warrning, '😕')
       }
     } catch (error) {
-      show_snackbar('لم يتم اختيار ملف', warrning, '😕')
+      show_snackbar('لم يتم اختيار ملف', warrning, '😕');
+      console.error(error)
     }
   }
   function show_snackbar(text, color, icon) {
@@ -297,7 +297,7 @@ function Home() {
   }
   function delete_file(title, index) {
     db = db.filter(file => file.title !== title);
-    write();
+    write().then(() => show_snackbar('تم حذف الملف', warrning, '🗑'));
 
 
     $(`Home > Stack > #files > #main`).children().dispose();
@@ -315,7 +315,6 @@ function Home() {
       $('Home  > Stack > Toolbar > Composite > #achive').set({ text: 0 });
 
     }
-    show_snackbar('تم حذف الملف', warrning, '🗑');
   }
 
   return (
@@ -327,8 +326,8 @@ function Home() {
         <Files />
 
       </Stack>
-      <Add />
       <Snackbar />
+      <Add />
       <Composite id='placeholder' padding={16} visible={db.length == 0 ? true : false} stretchX stretchY top='8%'>
         <TextView right font='16px dubai' text='Telegram: @Balsam_app 👆' onTap={() => app.launch('https://t.me/Balsam_app')} />
         <TextView left font='bold 16px dubai' textColor={success} text='نسبة إنجازك 👆' />
@@ -506,15 +505,15 @@ function Exam(file) {
 
     let balsam;
     if (ratio < 10) { balsam = repeat('😫', 3) }
-    if (ratio < 20) { balsam = repeat('😞', 3) }
-    if (ratio < 30) { balsam = repeat('😣', 3) }
-    if (ratio < 40) { balsam = repeat('😭', 3) }
-    if (ratio < 50) { balsam = repeat('😔', 3) }
-    if (ratio < 60) { balsam = repeat('😰', 3) }
-    if (ratio < 70) { balsam = repeat('🙂', 3) }
-    if (ratio < 80) { balsam = repeat('🙂', 3) }
-    if (ratio < 90) { balsam = repeat('🙂', 3) }
-    if (ratio < 100) { balsam = repeat('🙂', 3) }
+    else if (ratio < 20) { balsam = repeat('😞', 3) }
+    else if (ratio < 30) { balsam = repeat('😣', 3) }
+    else if (ratio < 40) { balsam = repeat('😭', 3) }
+    else if (ratio < 50) { balsam = repeat('😔', 3) }
+    else if (ratio < 60) { balsam = repeat('😰', 3) }
+    else if (ratio < 70) { balsam = repeat('🙂', 3) }
+    else if (ratio < 80) { balsam = repeat('😄', 3) }
+    else if (ratio < 90) { balsam = repeat('🤩', 3) }
+    else if (ratio < 100) { balsam = repeat('😎', 3) }
 
     const popoer = Popover.open(
       <Popover>
