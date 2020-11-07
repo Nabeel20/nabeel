@@ -56,6 +56,7 @@ async function read() {
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
+    <Home />
     </NavigationView>
   </$>
 );
