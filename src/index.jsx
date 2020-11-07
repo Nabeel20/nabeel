@@ -39,14 +39,17 @@ if (secureStorage.getItem('paid') == null) {
 paid = JSON.parse(secureStorage.getItem('paid'));
 
 async function write() {
-  let en = crypto.AES.encrypt(JSON.stringify(db), 'Nabeel Adnan Ali Nizam, Mom I love you').toString()
+  let en = crypto.AES.encrypt(JSON.stringify(db), 'Nabeel Adnan Ali Nizam, Mom I love you').toString();
+  console.log('en is: ' + en)
   await fs.writeFile(path, en, 'utf-8')
+  console.info('write() was called')
 }
 
 async function read() {
   let blsm_json = await fs.readFile(path, 'utf-8');
   let de = crypto.AES.decrypt(blsm_json, 'Nabeel Adnan Ali Nizam, Mom I love you').toString(crypto.enc.Utf8);
   db = JSON.parse(de);
+  console.info('read() was called')
   $(NavigationView).only().children().dispose().then(() => $(NavigationView).only().$append(<Home />))
 }
 
