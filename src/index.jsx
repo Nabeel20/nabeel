@@ -47,13 +47,14 @@ async function read() {
   let blsm_json = await fs.readFile(path, 'utf-8');
   let de = crypto.AES.decrypt(blsm_json, 'Nabeel Adnan Ali Nizam, Mom I love you').toString(crypto.enc.Utf8);
   db = JSON.parse(de);
-  $(NavigationView).only().append(<Home />)
+  $(NavigationView).only().children().dispose().then(() => $(NavigationView).only().$append(<Home />))
 }
 
 
 contentView.append(
   <$>
     <NavigationView stretch toolbarVisible={false}>
+      <Home />
     </NavigationView>
   </$>
 );
