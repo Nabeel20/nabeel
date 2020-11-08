@@ -51,7 +51,7 @@ async function read() {
   db = JSON.parse(de);
   console.info('read() was called')
   $(NavigationView).only().children().dispose()
-  $(NavigationView).only().$append(<Home />)
+  $(NavigationView).only().append(<Home />)
 }
 
 
