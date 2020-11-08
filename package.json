@@ -9,7 +9,7 @@
     "start": "tabris serve -a -w"
   },
   "dependencies": {
-    "crypto-js": "^4.0.0",
+    "crypto-js": "^3.3.0",
     "hashids": "^2.2.1",
     "lodash": "^4.17.20",
     "tabris": "~3.6.0"
