@@ -286,7 +286,6 @@ function Home() {
       }
     } catch (error) {
       show_snackbar('لم يتم اختيار ملف', warrning, '😕');
-      console.error(error)
     }
   }
   function show_snackbar(text, color, icon) {
